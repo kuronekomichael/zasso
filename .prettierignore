@@ -1,0 +1,17 @@
+# Exclude everything by default
+/**/*
+
+# Include all folders
+!/**/*/
+
+# But exclude node_modules folders anywhere
+node_modules/
+
+# Include specific file extensions
+!/**/*.ts
+/**/*.d.ts
+!/**/*.tsx
+
+# Exclude the common folder
+/cdk.out
+/bundle
