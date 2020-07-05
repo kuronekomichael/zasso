@@ -40,8 +40,8 @@ export class ZassoSfnStack extends Stack {
     const taskGetRandomWait = new Task(this, "Get random wait", {
       task: new RunLambdaTask(funcs.getRandomFn, {
         payload: TaskInput.fromObject({
-          min: 10, // * 60, // 600秒(=10分)
-          max: 50, // * 60, // 3000秒(=50分)
+          min: 10 * 60, // 600秒(=10分)
+          max: 50 * 60, // 3000秒(=50分)
         }),
       }),
       resultPath: "$.wait",
@@ -62,16 +62,6 @@ export class ZassoSfnStack extends Stack {
       resultPath: "$.meeting", // e.g. $.meeting.Payload.id
     });
 
-    // const taskMeetingDurationMin2Sec = new Task(
-    //   this,
-    //   "Convert minutes to seconds",
-    //   {
-    //     task: new EvaluateExpression(this, `"Convert minutes to seconds"`, {
-    //       expression: "$.meeting.Payload.duration * 60",
-    //     }),
-    //     resultPath: "$.meetingDurationSeconds",
-    //   }
-    // );
     const taskMeetingDurationMin2Sec = new EvaluateExpression(
       this,
       `"Convert minutes to seconds"`,
