@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { execSync } from 'child_process';
-import { mkdirsSync, copyFileSync } from 'fs-extra';
+import { execSync } from "child_process";
+import { mkdirsSync, copyFileSync } from "fs-extra";
 
 export const NODE_LAMBDA_LAYER_DIR = `${process.cwd()}/bundle`;
 
@@ -11,7 +11,7 @@ export const createBundle = () => {
   // Copy package.json and package-lock.json
   mkdirsSync(lambdaLayerRuntimePath);
 
-  ['package.json', 'package-lock.json'].map((file) =>
+  ["package.json", "package-lock.json"].map((file) =>
     copyFileSync(
       `${process.cwd()}/${file}`,
       `${lambdaLayerRuntimePath}/${file}`
@@ -20,8 +20,8 @@ export const createBundle = () => {
 
   // Install package.json (production)
   execSync(`npm --prefix ${lambdaLayerRuntimePath} install --production`, {
-    stdio: ['ignore', 'inherit', 'inherit'],
+    stdio: ["ignore", "inherit", "inherit"],
     env: { ...process.env },
-    shell: 'bash',
+    shell: "bash",
   });
 };

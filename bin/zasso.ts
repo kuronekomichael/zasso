@@ -1,33 +1,46 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import { App, Construct, Stack } from '@aws-cdk/core';
-import { SfnStack } from '../lib/sfn-stack';
-import { LambdaStack } from '../lib/lambda-stack';
-import { TriggerLambdaStack } from '../lib/trigger-lambda-stack';
-import { createBundle } from '../lib/nodejs-bundler';
+import "source-map-support/register";
+import { App, Construct, Stack } from "@aws-cdk/core";
+import { ZassoSfnStack } from "../lib/zasso-sfn-stack";
+import { ZassoAppLambdaStack } from "../lib/zasso-app-lambda-stack";
+import { ZassoTriggerStack } from "../lib/zasso-trigger-stack";
+import { createBundle } from "../lib/commons";
+
+const appName = "zasso";
 
 class ZassoService extends Stack {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
-    const stackId = id.charAt(0).toUpperCase() + id.slice(1).toLowerCase();
-    const lambdaStack = new LambdaStack(scope, `ZassoLambdaStack${stackId}`);
+    const stage = this.node.tryGetContext("stage");
+    if (!(stage && (stage === "dev" || stage === "prd")))
+      throw new Error(
+        `Invalid stage: ${stage}. It's only "dev" or "prd". cdk deploy --context stage=dev`
+      );
 
-    const sfnStack = new SfnStack(scope, `ZassoSfnStack${stackId}`, {
+    // Create bundle directory for Lamdba Layer
+    createBundle();
+
+    const props = {
+      appName,
+      stage,
+      description: `${appName}-${stage}`,
+    };
+
+    const lambdaStack = new ZassoAppLambdaStack(scope, `lambda-stack`, props);
+
+    const sfnStack = new ZassoSfnStack(scope, `sfn-stack`, {
+      ...props,
       funcs: lambdaStack.funcs,
     });
+    sfnStack.addDependency(lambdaStack);
 
-    new TriggerLambdaStack(scope, `ZassoTriggerLambdaStack${stackId}`, {
-      lambdaLayer: lambdaStack.lambdaLayer,
+    new ZassoTriggerStack(scope, `trigger-lambda-stack`, {
+      ...props,
+      lambdaLayer: lambdaStack.defaultLayer,
       stateMachine: sfnStack.stateMachine,
     });
   }
 }
 
-// Create bundle directory for Lamdba Layer
-createBundle();
-
-const app = new App();
-
-new ZassoService(app, 'dev');
-//FIXME: new ZassoService(app, 'prd');
+new ZassoService(new App(), "zasso-service");

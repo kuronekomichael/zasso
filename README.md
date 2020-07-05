@@ -7,10 +7,11 @@ Zasso is instant rest room on Zoom meeting!
 
 ## Deploy
 
-```
+```sh
 export AWS_PROFILE=your-aws-account-profile-name
 npm run build
-npm run deploy
+npm run deploy -- --context stage=dev
+# or npm run deploy -- --context stage=prd
 ```
 
 Enjoy!!
@@ -45,6 +46,8 @@ export SLACK_WEBHOOK_URL=https://hooks.slack.com/services/RkGGS/KgfasiKdfsafDDD/
 export SLACK_CHANNEL=lab_koki
 # 休憩室の作成に利用するZoomアカウントのトークン
 export ZOOM_JWT_TOKEN="kljjklatr3io3k12.a3t.gfasa33DD"
+# 環境の区分("dev" or "prd")
+export STAGE="dev"
 
 #
 # 以下、SSMへ設定を保存
