@@ -1,5 +1,5 @@
-import * as moment from 'moment-timezone';
-import * as holidayJp from '@holiday-jp/holiday_jp';
+import * as moment from "moment-timezone";
+import * as holidayJp from "@holiday-jp/holiday_jp";
 
 export const getRandom = async ({
   min = 0,
@@ -7,15 +7,15 @@ export const getRandom = async ({
 }: {
   min: number;
   max: number;
-}) => Math.floor(Math.random() * max) + min;
+}): Promise<number> => Math.floor(Math.random() * max) + min;
 
 export type TodayInfo = {
   comment: string;
   isWeekday: boolean;
 };
 
-export const getTodayInfo = async () => {
-  const now = moment().tz(process.env.TZ || 'Asia/Tokyo');
+export const getTodayInfo = async (): Promise<TodayInfo> => {
+  const now = moment().tz(process.env.TZ || "Asia/Tokyo");
 
   // 土日(1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 7=Sun)
   if (now.isoWeekday() > 5) {
@@ -34,7 +34,7 @@ export const getTodayInfo = async () => {
   }
 
   return {
-    comment: `Today is weekday ${now.format('YYYY-MM-DD')}`,
+    comment: `Today is weekday ${now.format("YYYY-MM-DD")}`,
     isWeekday: true,
   };
 };

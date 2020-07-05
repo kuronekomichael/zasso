@@ -1,9 +1,9 @@
-import * as moment from 'moment-timezone';
-import * as request from 'request-promise';
+import * as moment from "moment-timezone";
+import * as request from "request-promise";
 
-const TZ = process.env.TZ || 'Asia/Tokyo';
-const UA = 'Zoom-Jwt-Request';
-const END_POINT = 'https://api.zoom.us/v2';
+const TZ = process.env.TZ || "Asia/Tokyo";
+const UA = "Zoom-Jwt-Request";
+const END_POINT = "https://api.zoom.us/v2";
 const MEETING_DURATION_MINUTES = 10;
 
 /**
@@ -14,11 +14,11 @@ const getZoomUser = async (bearer: string) => {
   try {
     const response = await request.get({
       uri: `${END_POINT}/users`,
-      qs: { status: 'active' },
+      qs: { status: "active" },
       auth: { bearer },
       headers: {
-        'User-Agent': UA,
-        'content-type': 'application/json',
+        "User-Agent": UA,
+        "content-type": "application/json",
       },
       json: true,
     });
@@ -28,7 +28,7 @@ const getZoomUser = async (bearer: string) => {
       );
     return response.users.pop();
   } catch (err) {
-    console.error('API call failed, reason ', err);
+    console.error("API call failed, reason ", err);
     throw err;
   }
 };
@@ -60,12 +60,11 @@ const createZoomMeeting = async ({
   const options = {
     uri: `${END_POINT}/users/${user.id}/meetings`,
     body: {
-      /* eslint-disable @typescript-eslint/camelcase */
       topic,
       agenda: `${duration}分が経過すると自動的に終了します`,
       type: 2, // 1 = instant, 2 = scheduled, 3 = recurring with no fixed time, 8 = recurring with fixed time
       timezone: TZ,
-      start_time: moment().tz(TZ).format('YYYY-MM-DDTHH:mm:ss'), // ミーティングの開始時刻
+      start_time: moment().tz(TZ).format("YYYY-MM-DDTHH:mm:ss"), // ミーティングの開始時刻
       duration, // ミーティングの時間(単位: 分) しかし特に強制力はない様子...
       settings: {
         host_video: false, // ホストが入室したときにビデオを開始するか
@@ -77,17 +76,16 @@ const createZoomMeeting = async ({
         watermark: false, // 画面共有時にすかしを入れるかどうか
         use_pmi: false, // 自動生成されたIDではなく、個人用のIDを会議室IDとして使用するか
         approval_type: 2, //承認タイプ (0=自動承認, 1=手動承認, 2=登録は必要なし)
-        audio: 'voip', // オーディオ(both, telephony, voip)
-        auto_recording: 'none', // 自動記録(local, cloud, none)
+        audio: "voip", // オーディオ(both, telephony, voip)
+        auto_recording: "none", // 自動記録(local, cloud, none)
         enforce_login: false, // ログインしているユーザーのみが参加できるか
         waiting_room: false, // 待機室を有効にするか
       },
-      /* eslint-enable */
     },
     auth: { bearer },
     headers: {
-      'User-Agent': UA,
-      'content-type': 'application/json',
+      "User-Agent": UA,
+      "content-type": "application/json",
     },
     json: true,
   };
@@ -96,7 +94,7 @@ const createZoomMeeting = async ({
     const response = await request.post(options);
     return response;
   } catch (err) {
-    console.error('API call failed, reason ', err);
+    console.error("API call failed, reason ", err);
     throw err;
   }
 };
@@ -119,13 +117,11 @@ const sendSlackMessage = async ({
 }) => {
   await request.post({
     url: webHookUrl,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
     body: {
-      /* eslint-disable @typescript-eslint/camelcase */
       channel,
       text,
       link_names: 1, // @がメンションと解釈されるためのフラグ
-      /* eslint-enable */
     },
     json: true,
   });
@@ -148,20 +144,20 @@ export const createMeeting = async ({
   bearer,
   slackChannel,
   slackWebHookUrl,
-}: CreateMeetingOptions) => {
+}: CreateMeetingOptions): Promise<any> => {
   // インスタントミーティングを作成
   const meeting = await createZoomMeeting({
-    topic: 'Zasso',
+    topic: "Zasso",
     duration: MEETING_DURATION_MINUTES,
     bearer,
   });
 
   // Slack通知用のメッセージを作成
   const startTime = moment(meeting.start_time).tz(TZ);
-  const endTime = moment(startTime).add(meeting.duration, 'minutes');
+  const endTime = moment(startTime).add(meeting.duration, "minutes");
   const text = `@here ちょっと休憩しませんか？:coffee:\n:zoom: ${
     meeting.join_url
-  }\n:clock1: ${startTime.format('HH:mm')}〜${endTime.format('HH:mm')}（${
+  }\n:clock1: ${startTime.format("HH:mm")}〜${endTime.format("HH:mm")}（${
     meeting.duration
   }分間限定）\n息抜きのついでに、業務で行き詰まっている事を誰かに話してみては？意外と良いアイデアが出るかもですよ？！:hugging_face:`;
 
@@ -189,20 +185,20 @@ type ControlMeetingOptions = {
 export const stopMeeting = async ({
   bearer,
   meetingId,
-}: ControlMeetingOptions) => {
+}: ControlMeetingOptions): Promise<void> => {
   try {
     await request.put({
       uri: `${END_POINT}/meetings/${meetingId}/status`,
-      body: { action: 'end' },
+      body: { action: "end" },
       auth: { bearer },
       headers: {
-        'User-Agent': UA,
-        'content-type': 'application/json',
+        "User-Agent": UA,
+        "content-type": "application/json",
       },
       json: true,
     });
   } catch (err) {
-    console.error('API call failed, reason ', err);
+    console.error("API call failed, reason ", err);
     throw err;
   }
 };
@@ -216,19 +212,19 @@ export const stopMeeting = async ({
 export const deleteMeeting = async ({
   bearer,
   meetingId,
-}: ControlMeetingOptions) => {
+}: ControlMeetingOptions): Promise<void> => {
   try {
     await request.delete({
       uri: `${END_POINT}/meetings/${meetingId}`,
       auth: { bearer },
       headers: {
-        'User-Agent': UA,
-        'content-type': 'application/json',
+        "User-Agent": UA,
+        "content-type": "application/json",
       },
       json: true,
     });
   } catch (err) {
-    console.error('API call failed, reason ', err);
+    console.error("API call failed, reason ", err);
     throw err;
   }
 };

@@ -9,7 +9,7 @@ export const launch = async ({
   stateMachineArn,
 }: {
   stateMachineArn: string;
-}) => {
+}): Promise<any[]> => {
   // SSMからアカウント一覧を取得する
   const path = `/zasso/${STAGE}/account-manager/accounts/`;
 

@@ -1,1 +1,1 @@
-export const TZ = 'Asia/Tokyo';
+export const TZ = "Asia/Tokyo";

@@ -5,7 +5,7 @@ import { mkdirsSync, copyFileSync } from "fs-extra";
 export const NODE_LAMBDA_LAYER_DIR = `${process.cwd()}/bundle`;
 
 // Create bundle directory
-export const createBundle = () => {
+export const createBundle = (): void => {
   const lambdaLayerRuntimePath = `${NODE_LAMBDA_LAYER_DIR}/nodejs`;
 
   // Copy package.json and package-lock.json
