@@ -124,7 +124,7 @@ export class ZassoSfnStack extends Stack {
       {
         stateMachineName: `${appName}-${stage}-state-machine`,
         definition,
-        timeout: Duration.minutes(20), // 休憩時間は10分だが余裕をもって長めに設定
+        timeout: Duration.minutes(70), // 最大50分のランダム待ち時間 + 雑談時間は10分 なので、余裕を持って70
         logs: {
           destination: new LogGroup(this, `${appName}-${stage}-sm-lg`, {
             retention: RetentionDays.ONE_WEEK,
