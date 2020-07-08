@@ -12,6 +12,6 @@ export abstract class AppStack extends Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
     this.appName = props.appName;
-    this.stage = props.appName;
+    this.stage = props.stage;
   }
 }

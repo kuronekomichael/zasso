@@ -19,8 +19,8 @@
     "predeploy:lambda": "npm run build",
     "deploy:lambda": "cdk deploy lambda-stack",
     "predeploy": "npm run build",
-    "deploy": "cdk deploy lambda-stack sfn-stack trigger-lambda-stack",
-    "destroy": "cdk destroy lambda-stack sfn-stack trigger-lambda-stack"
+    "deploy": "cdk deploy *stack",
+    "destroy": "cdk destroy *stack"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.49.1",
