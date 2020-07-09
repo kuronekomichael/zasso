@@ -21,15 +21,18 @@ Enjoy!!
 SSM に設定値３つを保存する必要があります。
 アカウント識別子は[0-9a-z_-]であれば何でも構いません
 
-(1)Slack 通知用 チャンネル名
+### (1)Slack 通知用 チャンネル名
+
 /zasso/dev/account-manager/accounts/\${アカウント識別子}/slack-channel
 通知先のチャンネルは事前に作成しておいてください
 
-(2)Slack 通知用 WebHook URL
+### (2)Slack 通知用 WebHook URL
+
 /zasso/dev/account-manager/accounts/\${アカウント識別子}/slack-webhook-url
 WebHook URL は Slack [Custom Integrations](https://catfood.slack.com/apps/new/A0F7XDUAZ-incoming-webhooks)から発行が可能です
 
-(3)Zoom アカウント JWT トークン
+### (3)Zoom アカウント JWT トークン
+
 /zasso/dev/account-manager/accounts/\${アカウント識別子}/zoom-jwt-token
 Zoom アカウントの JWT トークンは、Zoom のアカウントがあれば[](https://marketplace.zoom.us/develop/create)から誰でも作成可能です。（無料アカウントでも可）
 
@@ -54,16 +57,16 @@ export STAGE="dev"
 #
 aws ssm put-parameter \
     --type String \
-    --name "/zasso/dev/account-manager/accounts/${ACCOUNT_NAME}/slack-channel" \
+    --name "/zasso/${STAGE}/account-manager/accounts/${ACCOUNT_NAME}/slack-channel" \
     --value "${SLACK_CHANNEL}"
 
 aws ssm put-parameter \
     --type SecureString \
-    --name "/zasso/dev/account-manager/accounts/${ACCOUNT_NAME}/slack-webhook-url" \
+    --name "/zasso/${STAGE}/account-manager/accounts/${ACCOUNT_NAME}/slack-webhook-url" \
     --value "${SLACK_WEBHOOK_URL}"
 
 aws ssm put-parameter \
     --type SecureString \
-    --name "/zasso/dev/account-manager/accounts/${ACCOUNT_NAME}/zoom-jwt-token" \
+    --name "/zasso/${STAGE}/account-manager/accounts/${ACCOUNT_NAME}/zoom-jwt-token" \
     --value "${ZOOM_JWT_TOKEN}"
 ```
