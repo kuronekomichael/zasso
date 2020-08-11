@@ -1,17 +1,15 @@
 import { SSM, StepFunctions } from "aws-sdk";
-
-const { STAGE } = process.env;
+import * as env from "env-var";
 
 /**
  * アカウント識別子毎に、Zassoのステートマシンを起動するだけ
  */
-export const launch = async ({
-  stateMachineArn,
-}: {
-  stateMachineArn: string;
-}): Promise<any[]> => {
+export const launch = async (): Promise<any[]> => {
+  const stage = env.get("STAGE").required().asString();
+  const stateMachineArn = env.get("STATE_MACHINE_ARN").required().asString();
+
   // SSMからアカウント一覧を取得する
-  const path = `/zasso/${STAGE}/account-manager/accounts/`;
+  const path = `/zasso/${stage}/account-manager/accounts/`;
 
   const ssm = new SSM();
   const results = await ssm
