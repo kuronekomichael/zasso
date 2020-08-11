@@ -28,6 +28,16 @@ export class ZassoSfnStack extends Stack {
   constructor(scope: Construct, id: string, props: ZassoSfnStackProps) {
     super(scope, id, props);
 
+    // Parameters
+    // 平日の決まった時刻からランダムに待ち時間をおいてからミーティングを作成する
+    // ランダム待ち時間の最小時間（デフォルトは 10分
+    const waitMinutesMin = this.node.tryGetContext("waitMinutesMin") ?? 10;
+    // ランダム待ち時間の最小時間（デフォルトは 50分）
+    const waitMinutesMax = this.node.tryGetContext("waitMinutesMax") ?? 50;
+    // 雑談時間（デフォルトは 10分）
+    const meetingDurationMunutes =
+      this.node.tryGetContext("meetingDurationMinutes") ?? 10;
+
     const { appName, stage, funcs } = props;
 
     const success = new Succeed(this, "Job end succeed");
@@ -40,15 +50,15 @@ export class ZassoSfnStack extends Stack {
     const taskGetRandomWait = new Task(this, "Get random wait", {
       task: new RunLambdaTask(funcs.getRandomFn, {
         payload: TaskInput.fromObject({
-          min: 10 * 60, // 600秒(=10分)
-          max: 50 * 60, // 3000秒(=50分)
+          min: waitMinutesMin * 60,
+          max: waitMinutesMax * 60,
         }),
       }),
-      resultPath: "$.wait",
+      resultPath: "$.waitSec",
     });
 
     const waitX = new Wait(this, "Wait X Seconds", {
-      time: WaitTime.secondsPath("$.wait.Payload"),
+      time: WaitTime.secondsPath("$.waitSec.Payload"),
     });
 
     const taskCreateMeeting = new Task(this, "Create a meeting", {
@@ -57,6 +67,7 @@ export class ZassoSfnStack extends Stack {
           "bearer.$": "$.zoom-jwt-token",
           "slackChannel.$": "$.slack-channel",
           "slackWebHookUrl.$": "$.slack-webhook-url",
+          meetingDuration: `${meetingDurationMunutes}`,
         }),
       }),
       resultPath: "$.meeting", // e.g. $.meeting.Payload.id
@@ -124,7 +135,7 @@ export class ZassoSfnStack extends Stack {
       {
         stateMachineName: `${appName}-${stage}-state-machine`,
         definition,
-        timeout: Duration.minutes(70), // 最大50分のランダム待ち時間 + 雑談時間は10分 なので、余裕を持って70
+        timeout: Duration.minutes(waitMinutesMax + meetingDurationMunutes + 5), // ランダム待ち時間最大値 + 雑談時間 + 終了処理に余裕をもたせて+5分
         logs: {
           destination: new LogGroup(this, `${appName}-${stage}-sm-lg`, {
             retention: RetentionDays.ONE_WEEK,

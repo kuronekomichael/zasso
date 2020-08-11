@@ -26,6 +26,10 @@ export class ZassoTriggerStack extends LambdaStack {
       defaultLayer: false,
     });
 
+    // 平日何時に実行するのかUTC時刻で指定(カンマ区切り)
+    // UTCで指定する。例) 3,8 = 日本時間では12時,17時
+    const hourToLaunch = this.node.tryGetContext("hourToLaunch") ?? "3,8";
+
     const iamPolicyDocSsmReadOnly = new PolicyDocument({
       statements: [
         // SSMの中でも、Zassoに関する特定のパス∧特定の環境下だけを読み込み可
@@ -63,22 +67,24 @@ export class ZassoTriggerStack extends LambdaStack {
       role,
     });
     lambdaFn.addEnvironment("STAGE", props.stage);
+    lambdaFn.addEnvironment(
+      "STATE_MACHINE_ARN",
+      props.stateMachine.stateMachineArn
+    );
 
     const timerRule = new Rule(this, `${id}-timerRule`, {
-      schedule: Schedule.expression(`cron(0 3,8 * * ? *)`), // 12時,17時(JST,+0900)
-      //                                  │ │     │ │ │ └ Year
-      //                                  │ │     │ │ └ Day-of-week (?=いずれかの曜日)
-      //                                  │ │     │ └ Month
-      //                                  │ │     └ Day-of-month
+      schedule: Schedule.expression(`cron(0 ${hourToLaunch} * * ? *)`),
+      //                                  │ │               │ │ │ └ Year
+      //                                  │ │               │ │ └ Day-of-week (?=いずれかの曜日)
+      //                                  │ │               │ └ Month
+      //                                  │ │               └ Day-of-month
       //                                  │ └ Hours(UTC)
       //                                  └ Minutes
     });
 
     timerRule.addTarget(
       new LambdaFunction(lambdaFn, {
-        event: RuleTargetInput.fromObject({
-          stateMachineArn: props.stateMachine.stateMachineArn,
-        }),
+        event: RuleTargetInput.fromObject({}),
       })
     );
   }

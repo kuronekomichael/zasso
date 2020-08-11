@@ -70,3 +70,20 @@ aws ssm put-parameter \
     --name "/zasso/${STAGE}/account-manager/accounts/${ACCOUNT_NAME}/zoom-jwt-token" \
     --value "${ZOOM_JWT_TOKEN}"
 ```
+
+### Optional Parameter
+
+- ‘waitMinutesMin` = ランダム待ち時間の最小時間（デフォルトは 10分）
+- ‘waitMinutesMax` = ランダム待ち時間の最小時間（デフォルトは 50分）
+- ‘meetingDurationMinutes` = 雑談時間（デフォルトは 10分）
+- ‘hourToLaunch` = 平日何時に実行するのかUTC時刻で指定(デフォルトは 日本時間で12時,17時)
+
+
+```bash
+npm run deploy -- \
+    --context stage=dev \
+    --context waitMinutesMin=0 \
+    --context waitMinutesMax=0 \
+    --context meetingDurationMinutes=15 \
+    --context hourToLaunch="5,8"
+```
