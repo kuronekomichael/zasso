@@ -58,7 +58,7 @@
     "aws-sdk": "^2.709.0",
     "env-var": "^6.3.0",
     "moment-timezone": "0.5.13",
-    "parcel": "^2.0.0-nightly.255",
+    "parcel": "^2.16.1",
     "request": "^2.88.2",
     "request-promise": "^4.2.5",
     "source-map-support": "^0.5.19"
